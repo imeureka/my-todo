@@ -1,10 +1,11 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link,  useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 
 const LoginPage = () => {
+    const navigate = useNavigate(); // navigate 함수 가져오기
     const [loggedIn, setLoggedIn] = useState(false);
   
     useEffect(() => {
@@ -15,25 +16,28 @@ const LoginPage = () => {
       }
     }, []);
   
-    const handleLogin = async (username, password) => {
-      try {
-        const response = await axios.post('http://localhost:3001/login', { username, password });
+    const handleLogin = async (email, password) => {
+        try {
+          const response = await axios.post('http://localhost:3001/login', { email, password });
+      
+          // 로그인 성공 시 토큰을 로컬 스토리지에 저장하고 로그인 상태 업데이트
+          const token = response.data.token;
+          localStorage.setItem('token', token);
+        //   setLoggedIn(true);
+         navigate('/todo');
+
+        } catch (error) {
+          console.log(error);
+        }
+      };
   
-        // 로그인 성공 시 토큰을 로컬 스토리지에 저장하고 로그인 상태 업데이트
-        const token = response.data.token;
-        localStorage.setItem('token', token);
-        setLoggedIn(true);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-  
+
     const handleLogout = () => {
-      // 로그아웃 시 로컬 스토리지에서 토큰 제거하고 로그인 상태 업데이트
-      localStorage.removeItem('token');
-      setLoggedIn(false);
-    };
-  
+        // 로그아웃 시 로컬 스토리지에서 토큰 제거하고 로그인 상태 업데이트
+        localStorage.removeItem('token');
+        setLoggedIn(false);
+      };
+      
     return (
       <div>
         {loggedIn ? (
@@ -84,9 +88,7 @@ const LoginPage = () => {
         <p>
         Don't have an account? <Link to="/signup">Sign up</Link>
       </p>
-      <p>
-        TOdo test <Link to="/todo">todo</Link>
-      </p>
+    
       </div>
     );
   };
