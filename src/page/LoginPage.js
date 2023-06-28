@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link,  useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import { LoginContainer, LoginForm, Input, Button } from '../style/loginForm.js';
 
 const LoginPage = () => {
     const navigate = useNavigate(); // navigate 함수 가져오기
@@ -63,32 +63,34 @@ const LoginPage = () => {
   
     return (
       <div>
+         <LoginContainer>
         <h2>Login</h2>
-        <form onSubmit={handleSubmit}>
+        <LoginForm onSubmit={handleSubmit}>
           <label>
             Username:
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
+            <Input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
           </label>
           <br />
           <label>
-            Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          Password:
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
           </label>
           <br />
-          <button type="submit">Login</button>
-        </form>
+          <Button type="submit">Login</Button>
+        
+        </LoginForm>
         <p>
         Don't have an account? <Link to="/signup">Sign up</Link>
       </p>
-    
+      </LoginContainer>
       </div>
     );
   };
