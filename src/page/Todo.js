@@ -6,6 +6,9 @@ const Todo = () => {
   const navigate = useNavigate();
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
+  const [editTodoId, setEditTodoId] = useState(null);
+  const [editTodoText, setEditTodoText] = useState('');
+
 
 //리다이렉팅
   useEffect(() => {
@@ -43,69 +46,119 @@ const fetchTodoList = async () => {
   const handleInputChange = (event) => {
     setNewTodo(event.target.value);
   };
-  
+
 //todo 생성하기
-  const handleAddTodo = async () => {
-    try {
-      const token = localStorage.getItem('token');
+//   const handleAddTodo = async () => {
+//     try {
+//       const token = localStorage.getItem('token');
 
-      const response = await axios.post('http://localhost:3001/todo', {
+//       const response = await axios.post('http://localhost:3001/todo', {
+//         title: newTodo,
+//       }, {
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
+
+//       setTodos([...todos, response.data.todo]);
+//       setNewTodo('');
+//     } catch (error) {
+//       console.error('투두 추가 오류:', error);
+//     }
+//   };
+
+//todo page 내 그냥 생성하기
+const handleAddTodo = () => {
+    if (newTodo.trim() !== '') {
+      const todo = {
+        id: Date.now(),
         title: newTodo,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setTodos([...todos, response.data.todo]);
+        completed: false,
+      };
+      setTodos([...todos, todo]);
       setNewTodo('');
-    } catch (error) {
-      console.error('투두 추가 오류:', error);
     }
   };
 
-  const handleToggleComplete = async (id) => {
-    try {
-      const token = localStorage.getItem('token');
-
-      await axios.put(`http://localhost:3001/todo/${id}`, {
-        completed: true,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const updatedTodos = todos.map((todo) => {
-        if (todo.id === id) {
-          return { ...todo, completed: true };
-        }
-        return todo;
-      });
-
-      setTodos(updatedTodos);
-    } catch (error) {
-      console.error('투두 완료 표시 오류:', error);
-    }
+  const handleToggleComplete = (id) => {
+    const updatedTodos = todos.map((todo) => {
+      if (todo.id === id) {
+        return { ...todo, completed: !todo.completed };
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
   };
 
-   const handleDeleteTodo = async (id) => {
-    try {
-      const token = localStorage.getItem('token');
+//   const handleToggleComplete = async (id) => {
+//     try {
+//       const token = localStorage.getItem('token');
 
-      await axios.delete(`http://localhost:3001/todo/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+//       await axios.put(`http://localhost:3001/todo/${id}`, {
+//         completed: true,
+//       }, {
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
 
-      const updatedTodos = todos.filter((todo) => todo.id !== id);
-      setTodos(updatedTodos);
-    } catch (error) {
-      console.error('투두 삭제 오류:', error);
-    }
+//       const updatedTodos = todos.map((todo) => {
+//         if (todo.id === id) {
+//           return { ...todo, completed: true };
+//         }
+//         return todo;
+//       });
+
+//       setTodos(updatedTodos);
+//     } catch (error) {
+//       console.error('투두 완료 표시 오류:', error);
+//     }
+//   };
+
+//    const handleDeleteTodo = async (id) => {
+//     try {
+//       const token = localStorage.getItem('token');
+
+//       await axios.delete(`http://localhost:3001/todo/${id}`, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
+
+
+//       const updatedTodos = todos.filter((todo) => todo.id !== id);
+//       setTodos(updatedTodos);
+//     } catch (error) {
+//       console.error('투두 삭제 오류:', error);
+//     }
+//   };
+
+const handleDeleteTodo = (id) => {
+    const updatedTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(updatedTodos);
+  };
+
+  const handleEditTodo = (id, title) => {
+    setEditTodoId(id);
+    setEditTodoText(title);
+  };
+  const handleUpdateTodo = (id) => {
+    const updatedTodos = todos.map((todo) => {
+      if (todo.id === id) {
+        return { ...todo, title: editTodoText };
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
+    setEditTodoId(null);
+    setEditTodoText('');
+  };
+//수정하기 -> 취소
+  const handleCancelEdit = () => {
+    setEditTodoId(null);
+    setEditTodoText('');
   };
 
   return (
@@ -114,15 +167,30 @@ const fetchTodoList = async () => {
     <ul>
       {todos.map((todo) => (
         <li key={todo.id}>
-          <label>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => handleToggleComplete(todo.id)}
-            />
-            <span>{todo.title}</span>
-          </label>
-          <button onClick={() => handleDeleteTodo(todo.id)}>삭제</button>
+          {editTodoId === todo.id ? (
+            <>
+              <input
+                type="text"
+                value={editTodoText}
+                onChange={(e) => setEditTodoText(e.target.value)}
+              />
+              <button onClick={() => handleUpdateTodo(todo.id)}>Save</button>
+              <button onClick={handleCancelEdit}>Cancel</button>
+            </>
+          ) : (
+            <>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => handleToggleComplete(todo.id)}
+                />
+                <span>{todo.title}</span>
+              </label>
+              <button onClick={() => handleEditTodo(todo.id, todo.title)}>Edit</button>
+              <button onClick={() => handleDeleteTodo(todo.id)}>Delete</button>
+            </>
+          )}
         </li>
       ))}
     </ul>
@@ -133,11 +201,10 @@ const fetchTodoList = async () => {
         onChange={handleInputChange}
       />
       <button data-testid="new-todo-add-button" onClick={handleAddTodo}>
-        추가
+        Add
       </button>
     </div>
   </div>
-  );
+);
 };
-
 export default Todo;
