@@ -180,6 +180,9 @@ app.post('/logout', (req, res) => {
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
+app.get('/todo', (req, res) => {
+  res.send('Hello, todo World!');
+});
 
 // 서버 시작
 app.listen(3001, () => {
